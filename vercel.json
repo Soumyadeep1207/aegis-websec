@@ -3,12 +3,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/app.py"
+      "destination": "/api/index.py"
     }
-  ],
-  "functions": {
-    "app.py": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }

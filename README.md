@@ -44,6 +44,30 @@ If dependencies are already installed in the included virtual environment, run:
 .\.venv\Scripts\python.exe run_server.py
 ```
 
+## Public Hosting
+
+This project is ready for cloud hosting on Render, Railway, or any Python WSGI host.
+
+Recommended Render setup:
+
+1. Connect this GitHub repository: `Soumyadeep1207/aegis-websec`
+2. Choose **New Web Service**
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `gunicorn wsgi:app`
+5. Add environment variables:
+   - `WEBSEC_SECRET_KEY`: generate a secure random value
+   - `WEBSEC_ALLOW_PRIVATE_TARGETS`: `0`
+   - `WEBSEC_SCAN_TIMEOUT`: `6`
+   - `WEBSEC_BLOCKED_DOMAINS`: optional comma-separated blocklist
+
+Render will provide a public URL such as:
+
+```text
+https://aegis-websec.onrender.com
+```
+
+For a custom domain, add the domain in the Render service settings, then create the DNS record Render shows, usually a `CNAME` from `www` to the Render hostname.
+
 ## Reviewer Entrypoints
 
 - Dashboard: `http://127.0.0.1:5000`

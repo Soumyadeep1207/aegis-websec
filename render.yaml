@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: aegis-websec
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app
+    envVars:
+      - key: WEBSEC_SECRET_KEY
+        generateValue: true
+      - key: WEBSEC_SCAN_TIMEOUT
+        value: "6"
+      - key: WEBSEC_ALLOW_PRIVATE_TARGETS
+        value: "0"
+      - key: WEBSEC_BLOCKED_DOMAINS
+        value: ""

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AEGIS WEBSEC | Methodology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+      :root { --bg:#020b18; --panel:rgba(5,20,38,.9); --cyan:#00d4ff; --green:#00ff9d; --text:#e8faff; --muted:#7ea2b8; --line:rgba(0,212,255,.28); --orange:#ff9f1c; }
+      * { box-sizing:border-box; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:"Share Tech Mono",monospace; background-image:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px); background-size:42px 42px; }
+      .wrap { margin:0 auto; max-width:1200px; padding:34px 18px 60px; }
+      h1,h2,h3 { font-family:Rajdhani,sans-serif; margin-top:0; }
+      h1 { color:var(--cyan); font-size:clamp(42px,6vw,74px); line-height:.95; }
+      a { color:var(--green); }
+      .grid { display:grid; gap:16px; grid-template-columns:repeat(3,1fr); margin-top:18px; }
+      .panel { background:var(--panel); border:1px solid var(--line); box-shadow:0 0 26px rgba(0,212,255,.1); padding:20px; }
+      .panel h2 { color:var(--cyan); }
+      .panel p,.panel li { color:#c8f6ff; line-height:1.55; }
+      .tag-row { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 22px; }
+      .tag-row span { border:1px solid rgba(0,212,255,.35); color:var(--cyan); padding:8px 10px; }
+      .flow { counter-reset:step; display:grid; gap:12px; margin-top:18px; }
+      .flow article { border-left:3px solid var(--green); padding-left:14px; }
+      .flow article::before { color:var(--orange); counter-increment:step; content:"0" counter(step) " "; font-weight:700; }
+      @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Assessment Methodology</h1>
+      <p class="panel">Aegis WebSec is a detection-only security assessment platform for authorized targets. It combines scoped crawling, modular checks, CVSS-style scoring, evidence exports, and remediation planning.</p>
+      <div class="tag-row">
+        <span>Authorization First</span>
+        <span>Same-Origin Scope</span>
+        <span>CVSS-Style Scoring</span>
+        <span>Evidence Package</span>
+        <span>Retest Workflow</span>
+      </div>
+      <section class="grid">
+        <article class="panel"><h2>Scope Control</h2><p>Targets are normalized, validated, and scanned within controlled page/depth limits. Crawling stays same-origin to avoid accidental scope expansion.</p></article>
+        <article class="panel"><h2>Detection Modules</h2><p>Modules review headers, TLS, cookies, CSP, CORS, security.txt, robots exposure, forms, directories, SQLi, XSS, redirects, and mixed content.</p></article>
+        <article class="panel"><h2>Reporting Model</h2><p>Findings are enriched with CVSS-style severity, priority, SLA, confidence, exploitability, business impact, data sensitivity, and verification status.</p></article>
+      </section>
+      <section class="panel">
+        <h2>Scan Pipeline</h2>
+        <div class="flow">
+          <article>Validate authorization-oriented target input and optional policy blocklist.</article>
+          <article>Crawl same-origin pages within selected depth and page limits.</article>
+          <article>Run passive and active modules based on the selected profile.</article>
+          <article>Normalize findings into risk, control, effort, and workflow metadata.</article>
+          <article>Persist history and generate PDF, JSON, CSV, and portfolio artifacts.</article>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Competition Differentiators</h2>
+        <ul>
+          <li>Dashboard, history, result detail, PDF, JSON, CSV, portfolio API, and readiness API are all implemented.</li>
+          <li>Executive and technical audiences get different views of the same evidence.</li>
+          <li>Remediation workflow and retest planning make the project operational, not just visual.</li>
+          <li>Ethical-use framing and scope controls are visible in the product and documentation.</li>
+        </ul>
+        <p><a href="/">Back to dashboard</a> <a href="/readiness">Readiness report</a></p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AEGIS WEBSEC | Readiness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+      :root { --bg:#020b18; --panel:rgba(5,20,38,.9); --cyan:#00d4ff; --green:#00ff9d; --text:#e8faff; --muted:#7ea2b8; --line:rgba(0,212,255,.28); }
+      * { box-sizing:border-box; }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:"Share Tech Mono",monospace; background-image:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px); background-size:42px 42px; }
+      .wrap { margin:0 auto; max-width:1180px; padding:34px 18px 60px; }
+      h1,h2 { color:var(--cyan); font-family:Rajdhani,sans-serif; margin-top:0; }
+      h1 { font-size:clamp(42px,6vw,74px); line-height:.95; }
+      a { color:var(--green); }
+      .hero,.panel,.metric { background:var(--panel); border:1px solid var(--line); box-shadow:0 0 26px rgba(0,212,255,.1); padding:20px; }
+      .hero { display:flex; gap:24px; justify-content:space-between; margin-bottom:18px; }
+      .score { color:var(--green); font-family:Rajdhani,sans-serif; font-size:74px; line-height:1; }
+      .metrics { display:grid; gap:14px; grid-template-columns:repeat(4,1fr); margin-bottom:18px; }
+      .metric strong { color:var(--green); display:block; font-family:Rajdhani,sans-serif; font-size:34px; }
+      .metric span,.panel p,.panel li { color:#c8f6ff; line-height:1.55; }
+      .checks { display:grid; gap:12px; }
+      .check { display:grid; gap:10px; grid-template-columns:180px 140px minmax(0,1fr); border-bottom:1px solid rgba(0,212,255,.14); padding:12px 0; }
+      .status { color:var(--green); font-weight:700; }
+      @media(max-width:900px){.hero{display:block}.metrics,.check{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <div>
+          <h1>{{ report.overall_status }}</h1>
+          <p>Reviewer-facing completion report for Aegis WebSec.</p>
+          <p><a href="/">Dashboard</a> <a href="/methodology">Methodology</a> <a href="/api/readiness">Readiness API</a></p>
+        </div>
+        <div><div class="score">{{ report.completion_score }}</div><span>Completion Score</span></div>
+      </section>
+      <section class="metrics">
+        <article class="metric"><strong>{{ report.metrics.total_scans }}</strong><span>Total Scans</span></article>
+        <article class="metric"><strong>{{ report.metrics.portfolio_score }}</strong><span>Portfolio Score</span></article>
+        <article class="metric"><strong>{{ report.metrics.unique_targets }}</strong><span>Unique Targets</span></article>
+        <article class="metric"><strong>{{ report.metrics.reports }}</strong><span>PDF Reports</span></article>
+      </section>
+      <section class="panel">
+        <h2>Completion Checks</h2>
+        <div class="checks">
+          {% for check in report.checks %}
+            <div class="check">
+              <strong>{{ check.area }}</strong>
+              <span class="status">{{ check.status }}</span>
+              <span>{{ check.detail }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Reviewer Entrypoints</h2>
+        <ul>
+          {% for item in report.reviewer_entrypoints %}
+            <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+          {% endfor %}
+        </ul>
+        <p>Recommended safe demo target: {{ report.recommended_demo_target }}</p>
+      </section>
+    </main>
+  </body>
+</html>

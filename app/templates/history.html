@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AEGIS WEBSEC | History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+      :root { --bg:#020b18; --panel:rgba(5,20,38,.9); --cyan:#00d4ff; --green:#00ff9d; --red:#ff304f; --orange:#ff9f1c; --text:#e8faff; --muted:#7ea2b8; --line:rgba(0,212,255,.28); }
+      body { margin:0; background:var(--bg); color:var(--text); font-family:"Share Tech Mono",monospace; background-image:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px); background-size:42px 42px; }
+      .wrap { margin:0 auto; max-width:1180px; padding:34px 18px 60px; }
+      h1 { color:var(--cyan); font-family:Rajdhani,sans-serif; font-size:52px; margin-top:0; }
+      .panel { background:var(--panel); border:1px solid var(--line); box-shadow:0 0 26px rgba(0,212,255,.1); padding:22px; }
+      .metrics { display:grid; gap:14px; grid-template-columns:repeat(4,1fr); margin-bottom:18px; }
+      .metric { background:var(--panel); border:1px solid var(--line); box-shadow:0 0 22px rgba(0,212,255,.08); padding:16px; }
+      .metric strong { color:var(--green); display:block; font-family:Rajdhani,sans-serif; font-size:34px; }
+      .metric span { color:var(--muted); }
+      .toolbar { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
+      .toolbar a { border:1px solid rgba(0,212,255,.35); color:var(--green); padding:10px 12px; text-decoration:none; text-transform:uppercase; }
+      table { border-collapse:collapse; width:100%; }
+      th,td { border-bottom:1px solid rgba(0,212,255,.18); padding:13px 10px; text-align:left; vertical-align:top; }
+      th { color:var(--cyan); font-family:Rajdhani,sans-serif; font-size:18px; }
+      a { color:var(--green); margin-right:12px; }
+      .muted { color:var(--muted); }
+      .grade-pill { border:1px solid currentColor; display:inline-flex; font-weight:700; justify-content:center; min-width:34px; padding:5px 9px; text-shadow:0 0 12px currentColor; }
+      .grade-a { color:var(--green); box-shadow:0 0 14px rgba(0,255,157,.34); }
+      .grade-b { color:#7cffd3; box-shadow:0 0 12px rgba(124,255,211,.25); }
+      .grade-c { color:var(--orange); box-shadow:0 0 12px rgba(255,159,28,.26); }
+      .grade-d { color:#ff6379; box-shadow:0 0 12px rgba(255,99,121,.28); }
+      .grade-f { color:var(--red); box-shadow:0 0 16px rgba(255,48,79,.45); }
+      @media(max-width:900px){.metrics{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      {% set m = metrics|default({"total_scans": 0, "total_findings": 0, "serious_findings": 0, "average_risk": 0}) %}
+      <h1>Scan History</h1>
+      <section class="metrics">
+        <div class="metric"><strong>{{ m.total_scans }}</strong><span>Total Scans</span></div>
+        <div class="metric"><strong>{{ m.total_findings }}</strong><span>Total Findings</span></div>
+        <div class="metric"><strong>{{ m.serious_findings }}</strong><span>Critical + High</span></div>
+        <div class="metric"><strong>{{ m.average_risk }}</strong><span>Average Risk</span></div>
+      </section>
+      <nav class="toolbar">
+        <a href="/history.csv">Download CSV</a>
+        <a href="/api/portfolio">Portfolio JSON</a>
+        <a href="/">Run New Scan</a>
+      </nav>
+      <section class="panel">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Target URL</th><th>Timestamp</th><th>Finding Counts</th><th>Grade</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {% for scan in scans %}
+              {% set grade = scan.summary.get("grade", "A") %}
+              <tr>
+                <td>#{{ scan.id }}</td>
+                <td>{{ scan.target }}</td>
+                <td>{{ scan.timestamp }}</td>
+                <td>
+                  C: {{ scan.summary.get("critical", 0) }},
+                  H: {{ scan.summary.get("high", 0) }},
+                  M: {{ scan.summary.get("medium", 0) }},
+                  L: {{ scan.summary.get("low", 0) }},
+                  I: {{ scan.summary.get("info", 0) }}
+                </td>
+                <td><span class="grade-pill grade-{{ grade|lower }}">{{ grade }}</span></td>
+                <td>
+                  <a href="/results/{{ scan.id }}">Results</a>
+                  {% if scan.pdf_path %}<a href="/download/{{ scan.id }}">PDF</a>{% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted">No scan history yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p><a href="/">Back to dashboard</a></p>
+      </section>
+    </main>
+  </body>
+</html>

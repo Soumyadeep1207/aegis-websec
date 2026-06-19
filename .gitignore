@@ -1,0 +1,9 @@
+.venv/
+.vscode/
+__pycache__/
+.pytest_cache/
+instance/
+*.pyc
+*.sqlite3
+work/
+reports/*.pdf

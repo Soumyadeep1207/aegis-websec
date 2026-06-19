@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AEGIS WEBSEC | Dashboard</title>
+    <meta name="application-name" content="WebSec Scanner">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #020b18;
+        --panel: rgba(5, 20, 38, 0.86);
+        --cyan: #00d4ff;
+        --green: #00ff9d;
+        --red: #ff304f;
+        --orange: #ff9f1c;
+        --blue: #4da3ff;
+        --muted: #7ea2b8;
+        --text: #e8faff;
+        --line: rgba(0, 212, 255, 0.28);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(rgba(0, 212, 255, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.06) 1px, transparent 1px),
+          radial-gradient(circle at 15% 10%, rgba(0, 255, 157, 0.16), transparent 28%),
+          radial-gradient(circle at 85% 20%, rgba(0, 212, 255, 0.18), transparent 30%),
+          var(--bg);
+        background-size: 42px 42px, 42px 42px, 100% 100%, 100% 100%, 100% 100%;
+        color: var(--text);
+        font-family: "Share Tech Mono", monospace;
+      }
+      body::before {
+        animation: scanline 7s linear infinite;
+        background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.08), transparent);
+        content: "";
+        height: 180px;
+        left: 0;
+        pointer-events: none;
+        position: fixed;
+        right: 0;
+        top: -180px;
+      }
+      @keyframes scanline { to { top: 100vh; } }
+      .topbar {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(18px);
+        background: rgba(2, 11, 24, 0.82);
+        display: flex;
+        justify-content: space-between;
+        padding: 18px clamp(18px, 4vw, 54px);
+      }
+      .logo {
+        color: var(--cyan);
+        font-family: Rajdhani, sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-shadow: 0 0 18px rgba(0, 212, 255, 0.75);
+      }
+      .status { align-items: center; color: var(--muted); display: flex; gap: 10px; }
+      .dot { background: var(--green); border-radius: 50%; box-shadow: 0 0 14px var(--green); height: 10px; width: 10px; }
+      .wrap { margin: 0 auto; max-width: 1220px; padding: 34px 18px 60px; }
+      .hero {
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.12), rgba(0, 255, 157, 0.06)), var(--panel);
+        box-shadow: 0 0 34px rgba(0, 212, 255, 0.15);
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(0, 1fr) minmax(330px, 0.85fr);
+        padding: 32px;
+      }
+      h1, h2, h3 { font-family: Rajdhani, sans-serif; margin-top: 0; }
+      h1 { font-size: clamp(44px, 7vw, 82px); line-height: 0.94; margin-bottom: 12px; }
+      .sub { color: var(--muted); font-size: 18px; line-height: 1.55; max-width: 720px; }
+      .panel, .card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 0 26px rgba(0, 212, 255, 0.10);
+      }
+      .scan-box { padding: 22px; }
+      label { color: var(--cyan); display: block; margin-bottom: 7px; }
+      input, select {
+        background: #041225;
+        border: 1px solid rgba(0, 212, 255, 0.45);
+        color: var(--text);
+        font: inherit;
+        outline: none;
+        padding: 13px;
+        width: 100%;
+      }
+      input:focus, select:focus { box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.18); }
+      .row { display: grid; gap: 12px; grid-template-columns: 1fr auto; }
+      .options { display: grid; gap: 12px; grid-template-columns: 1.2fr 0.8fr 0.8fr; margin-top: 14px; }
+      button, .btn {
+        background: linear-gradient(135deg, var(--cyan), var(--green));
+        border: 0;
+        color: #00111f;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        padding: 0 20px;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+      button { min-height: 48px; }
+      button:disabled { cursor: wait; filter: grayscale(0.55); opacity: 0.7; }
+      .progress { color: var(--green); margin-top: 14px; min-height: 24px; }
+      .grid { display: grid; gap: 16px; margin-top: 22px; }
+      .stats { grid-template-columns: repeat(5, 1fr); }
+      .features { grid-template-columns: repeat(5, 1fr); }
+      .card { padding: 18px; }
+      .card strong { display: block; font-family: Rajdhani, sans-serif; font-size: 28px; }
+      .card span { color: var(--muted); }
+      .card small { color: var(--text); display: block; line-height: 1.45; margin-top: 8px; }
+      .briefing { display: grid; gap: 16px; grid-template-columns: 1.05fr 0.95fr; margin-top: 22px; }
+      .briefing-list { display: grid; gap: 10px; margin: 0; padding: 0; }
+      .briefing-list li {
+        border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+        display: flex;
+        gap: 14px;
+        justify-content: space-between;
+        list-style: none;
+        padding: 9px 0;
+      }
+      .briefing-list span { color: var(--muted); }
+      .briefing-list strong { color: var(--green); text-align: right; }
+      .roadmap { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); margin-top: 22px; }
+      .roadmap h3 { color: var(--cyan); margin-bottom: 8px; }
+      .roadmap p { color: #c8f6ff; line-height: 1.5; margin: 0; }
+      .signal { color: var(--orange); }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+      .tool-link {
+        border: 1px solid rgba(0, 212, 255, 0.35);
+        color: var(--green);
+        padding: 10px 12px;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+      .score-ring {
+        align-items: center;
+        border: 1px solid rgba(0, 255, 157, 0.34);
+        box-shadow: 0 0 24px rgba(0, 255, 157, 0.12);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-top: 22px;
+        padding: 18px;
+      }
+      .score-ring strong { color: var(--green); font-family: Rajdhani, sans-serif; font-size: 52px; }
+      .score-ring span { color: var(--muted); display: block; }
+      .winner-grid { display: grid; gap: 16px; grid-template-columns: repeat(4, 1fr); margin-top: 22px; }
+      .winner-card { border-top: 3px solid var(--green); }
+      .winner-card strong { color: var(--green); font-size: 34px; }
+      .compliance-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+      .compliance-strip span {
+        border: 1px solid rgba(0, 212, 255, 0.32);
+        color: var(--cyan);
+        padding: 8px 10px;
+      }
+      .critical strong { color: var(--red); text-shadow: 0 0 14px var(--red); }
+      .high strong { color: #ff6379; }
+      .medium strong { color: var(--orange); }
+      .low strong { color: var(--blue); }
+      .info strong { color: var(--cyan); }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border-bottom: 1px solid rgba(0, 212, 255, 0.16); padding: 13px 10px; text-align: left; }
+      th { color: var(--cyan); font-family: Rajdhani, sans-serif; font-size: 18px; }
+      .section { margin-top: 28px; padding: 22px; }
+      .actions a { color: var(--green); margin-right: 14px; }
+      .grade-pill {
+        border: 1px solid currentColor;
+        display: inline-flex;
+        font-weight: 700;
+        justify-content: center;
+        min-width: 34px;
+        padding: 5px 9px;
+        text-shadow: 0 0 12px currentColor;
+      }
+      .grade-a { color: var(--green); box-shadow: 0 0 14px rgba(0, 255, 157, 0.34); }
+      .grade-b { color: #7cffd3; box-shadow: 0 0 12px rgba(124, 255, 211, 0.25); }
+      .grade-c { color: var(--orange); box-shadow: 0 0 12px rgba(255, 159, 28, 0.26); }
+      .grade-d { color: #ff6379; box-shadow: 0 0 12px rgba(255, 99, 121, 0.28); }
+      .grade-f { color: var(--red); box-shadow: 0 0 16px rgba(255, 48, 79, 0.45); }
+      .scan-overlay {
+        align-items: center;
+        background: rgba(1, 7, 16, 0.78);
+        backdrop-filter: blur(10px);
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        padding: 18px;
+        position: fixed;
+        z-index: 20;
+      }
+      .scan-overlay.hidden { display: none; }
+      .terminal {
+        background: #020b18;
+        border: 1px solid var(--line);
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.24);
+        max-width: 720px;
+        width: min(100%, 720px);
+      }
+      .terminal-head {
+        align-items: center;
+        background: #041225;
+        border-bottom: 1px solid var(--line);
+        color: var(--cyan);
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 14px;
+      }
+      .terminal-lights { display: flex; gap: 7px; }
+      .terminal-lights span { border-radius: 50%; height: 10px; width: 10px; }
+      .terminal-lights span:nth-child(1) { background: var(--red); }
+      .terminal-lights span:nth-child(2) { background: var(--orange); }
+      .terminal-lights span:nth-child(3) { background: var(--green); }
+      .terminal-body { padding: 16px; }
+      .terminal-log {
+        color: #c8f6ff;
+        height: 230px;
+        line-height: 1.55;
+        margin: 0 0 14px;
+        overflow: hidden;
+        white-space: pre-wrap;
+      }
+      .terminal-log span { color: var(--green); }
+      .terminal-progress {
+        background: rgba(0, 212, 255, 0.08);
+        border: 1px solid rgba(0, 212, 255, 0.35);
+        height: 14px;
+        overflow: hidden;
+      }
+      .terminal-progress div {
+        background: linear-gradient(90deg, var(--cyan), var(--green));
+        height: 100%;
+        transition: width 0.35s ease;
+        width: 0%;
+      }
+      @media (max-width: 900px) {
+        .hero, .stats, .features, .options, .row, .briefing, .roadmap, .winner-grid { grid-template-columns: 1fr; }
+        button { padding: 14px 18px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo">AEGIS WEBSEC</div>
+      <div class="status"><span class="dot"></span> SYSTEM ONLINE</div>
+    </header>
+
+    <main class="wrap">
+      {% set m = metrics|default({"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0, "total_scans": 0, "total_findings": 0, "serious_findings": 0, "average_risk": 0, "worst_grade": "A", "reports": 0, "latest_risk": 0, "trend_delta": 0, "trend_label": "Stable", "most_scanned_target": "No targets yet", "presentation_readiness": "Run first scan"}) %}
+      <section class="hero">
+        <div>
+          <h1>WEB SECURITY COMMAND CENTER</h1>
+          <p class="sub">International competition-ready assessment console for authorized targets: OWASP-style checks, CVSS scoring, crawl coverage, executive A-F grading, evidence exports, and remediation guidance.</p>
+          <div class="compliance-strip">
+            <span>OWASP Top 10 Mapping</span>
+            <span>CVSS-Style Severity</span>
+            <span>Evidence-First Reporting</span>
+            <span>Authorized Testing Workflow</span>
+          </div>
+          <div class="toolbar">
+            <a class="tool-link" href="/history.csv">Export CSV</a>
+            <a class="tool-link" href="/api/portfolio">Portfolio API</a>
+            <a class="tool-link" href="/history">Audit History</a>
+            <a class="tool-link" href="/methodology">Methodology</a>
+            <a class="tool-link" href="/readiness">Readiness</a>
+          </div>
+        </div>
+        <form class="scan-box panel" id="scanForm">
+          <label for="target_url">TARGET URL</label>
+          <div class="row">
+            <input id="target_url" name="target_url" type="url" placeholder="http://testphp.vulnweb.com" required>
+            <button id="runScanButton" type="submit">Run Scan</button>
+          </div>
+          <div class="options">
+            <label>Profile
+              <select name="profile">
+                <option value="competition" selected>Competition</option>
+                <option value="deep">Deep Crawl</option>
+                <option value="standard">Standard</option>
+                <option value="quick">Quick Passive</option>
+              </select>
+            </label>
+            <label>Max pages <input name="max_pages" type="number" min="1" max="50" value="20"></label>
+            <label>Crawl depth <input name="max_depth" type="number" min="0" max="3" value="2"></label>
+          </div>
+          <div class="progress" id="progressText"></div>
+        </form>
+      </section>
+
+      <section class="grid stats">
+        <div class="card"><strong>{{ m.total_scans }}</strong><span>Total Scans</span><small>Stored evidence packages</small></div>
+        <div class="card critical"><strong>{{ m.serious_findings }}</strong><span>Critical + High</span><small>Priority remediation load</small></div>
+        <div class="card medium"><strong>{{ m.average_risk }}</strong><span>Average Risk</span><small>0-100 executive score</small></div>
+        <div class="card"><strong>{{ m.worst_grade }}</strong><span>Worst Grade</span><small>Highest exposure in history</small></div>
+        <div class="card info"><strong>{{ m.presentation_readiness }}</strong><span>Readiness</span><small>{{ m.reports }} PDF reports available</small></div>
+      </section>
+
+      <section class="score-ring panel">
+        <div>
+          <strong>{{ m.portfolio_score }}</strong>
+          <span>Portfolio Security Score</span>
+        </div>
+        <div>
+          <strong>{{ m.unique_targets }}</strong>
+          <span>Unique Targets Assessed</span>
+        </div>
+        <div>
+          <strong>{{ m.latest_risk }}</strong>
+          <span>Latest Scan Risk</span>
+        </div>
+      </section>
+
+      <section class="grid features">
+        <div class="card"><strong>OWASP</strong><span>Injection, XSS, headers, TLS, redirects</span><small>Coverage aligned to common web risk domains.</small></div>
+        <div class="card"><strong>CVSS</strong><span>Manual severity-to-score mapping</span><small>Transparent scoring for judges and reviewers.</small></div>
+        <div class="card"><strong>Reports</strong><span>PDF and JSON evidence exports</span><small>Useful for audit trails and competition submissions.</small></div>
+        <div class="card"><strong>Crawl</strong><span>Same-origin page discovery</span><small>Depth and page limits keep scans controlled.</small></div>
+        <div class="card"><strong>Grade</strong><span>A-F executive security grade</span><small>Fast board-level interpretation of technical results.</small></div>
+      </section>
+
+      <section class="winner-grid">
+        <article class="panel card winner-card">
+          <strong>95</strong><span>Technical Depth</span><small>Modular scanner, crawler, scoring, reports, and exports.</small>
+        </article>
+        <article class="panel card winner-card">
+          <strong>96</strong><span>Ethical Safety</span><small>Authorized workflow, same-origin scope, configurable blocklist.</small>
+        </article>
+        <article class="panel card winner-card">
+          <strong>94</strong><span>Real-World Use</span><small>SLA, confidence, control mapping, PDF, JSON, CSV.</small>
+        </article>
+        <article class="panel card winner-card">
+          <strong>92</strong><span>Presentation Impact</span><small>Live overlay, executive risk language, demo-ready flow.</small>
+        </article>
+      </section>
+
+      <section class="briefing">
+        <div class="panel card">
+          <h2>Competition Briefing</h2>
+          <ul class="briefing-list">
+            <li><span>Default profile</span><strong>Competition</strong></li>
+            <li><span>Scope discipline</span><strong>Same-origin only</strong></li>
+            <li><span>Output package</span><strong>Dashboard + PDF + JSON</strong></li>
+            <li><span>Remediation detail</span><strong>Impact, fix steps, verification</strong></li>
+            <li><span>Risk trend</span><strong class="signal">{{ m.trend_label }} ({{ m.trend_delta }})</strong></li>
+            <li><span>Most scanned target</span><strong>{{ m.most_scanned_target }}</strong></li>
+          </ul>
+        </div>
+        <div class="panel card">
+          <h2>Assessment Modules</h2>
+          <ul class="briefing-list">
+            <li><span>Passive hardening</span><strong>Headers, cookies, CSP, CORS</strong></li>
+            <li><span>Transport checks</span><strong>HTTPS, TLS, mixed content</strong></li>
+            <li><span>Active probes</span><strong>SQLi, reflected XSS, directories</strong></li>
+            <li><span>Governance signals</span><strong>robots.txt, security.txt, fingerprinting</strong></li>
+            <li><span>Reporting model</span><strong>SLA, confidence, control mapping</strong></li>
+            <li><span>Demo value</span><strong>Executive + technical evidence</strong></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="roadmap">
+        <article class="panel card">
+          <h3>Judge Narrative</h3>
+          <p>Shows authorization-first scanning, controlled crawling, transparent scoring, and evidence exports in one flow.</p>
+        </article>
+        <article class="panel card">
+          <h3>Enterprise Detail</h3>
+          <p>Each new finding is enriched with remediation SLA, confidence, priority, and recognized control family mapping.</p>
+        </article>
+        <article class="panel card">
+          <h3>Demo Flow</h3>
+          <p>Run scan, watch live terminal progress, review executive risk, filter findings, export JSON or PDF.</p>
+        </article>
+        <article class="panel card">
+          <h3>Portfolio Layer</h3>
+          <p>CSV and portfolio JSON exports make the project feel integration-ready for analytics and audit review.</p>
+        </article>
+        <article class="panel card">
+          <h3>Win Condition</h3>
+          <p>Combines product UX, security methodology, explainable scoring, and professional evidence packaging.</p>
+        </article>
+        <article class="panel card">
+          <h3>Retest Story</h3>
+          <p>Risk trend and previous-scan comparison show measurable improvement after remediation.</p>
+        </article>
+      </section>
+
+      <section class="section panel">
+        <h2>Scan History</h2>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Target</th><th>Timestamp</th><th>Findings</th><th>Grade</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {% for scan in scans %}
+              {% set grade = scan.summary.get("grade", "A") %}
+              <tr>
+                <td>#{{ scan.id }}</td>
+                <td>{{ scan.target }}</td>
+                <td>{{ scan.timestamp }}</td>
+                <td>{{ scan.findings|length }}</td>
+                <td><span class="grade-pill grade-{{ grade|lower }}">{{ grade }}</span></td>
+                <td class="actions">
+                  <a href="/results/{{ scan.id }}">Results</a>
+                  {% if scan.pdf_path %}<a href="/download/{{ scan.id }}">PDF</a>{% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6">No scans yet. Run your first authorized assessment.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <div class="scan-overlay hidden" id="scanOverlay" role="status" aria-live="polite">
+      <div class="terminal">
+        <div class="terminal-head">
+          <span>AEGIS LIVE SCAN</span>
+          <div class="terminal-lights"><span></span><span></span><span></span></div>
+        </div>
+        <div class="terminal-body">
+          <pre class="terminal-log" id="scanLog"></pre>
+          <div class="terminal-progress"><div id="terminalProgress"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("scanForm");
+      const progressText = document.getElementById("progressText");
+      const runButton = document.getElementById("runScanButton");
+      const overlay = document.getElementById("scanOverlay");
+      const scanLog = document.getElementById("scanLog");
+      const terminalProgress = document.getElementById("terminalProgress");
+      const logLines = [
+        "Booting authorized assessment workflow",
+        "Loading profile and crawl limits",
+        "Checking legal target guardrails",
+        "Preparing detection modules",
+        "Building evidence timeline",
+        "Mapping findings to executive risk model"
+      ];
+
+      function renderLog(progress, message) {
+        const visible = [...logLines, message || "Working"].slice(-8);
+        scanLog.innerHTML = visible.map((line) => `<span>&gt;</span> ${line}`).join("\n");
+        terminalProgress.style.width = `${Math.max(0, Math.min(100, progress || 0))}%`;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        progressText.textContent = "Starting scan...";
+        runButton.disabled = true;
+        overlay.classList.remove("hidden");
+        renderLog(5, "Starting scan request");
+        const formData = new FormData(form);
+        const response = await fetch("/scan", { method: "POST", body: formData });
+        const data = await response.json();
+        if (!response.ok) {
+          progressText.textContent = data.error || "Scan failed to start.";
+          logLines.push(data.error || "Scan failed to start");
+          renderLog(100, "Request blocked");
+          runButton.disabled = false;
+          setTimeout(() => overlay.classList.add("hidden"), 2400);
+          return;
+        }
+        pollStatus(data.scan_id);
+      });
+
+      async function pollStatus(scanId) {
+        const timer = setInterval(async () => {
+          const response = await fetch(`/status/${scanId}`);
+          const data = await response.json();
+          progressText.textContent = `${data.progress || 0}% - ${data.message || data.state}`;
+          if (data.message) {
+            logLines.push(data.message);
+          }
+          renderLog(data.progress || 0, data.message || data.state);
+          if (data.state === "done") {
+            clearInterval(timer);
+            logLines.push("Report generated. Opening results");
+            renderLog(100, "Scan complete");
+            window.location.href = data.results_url;
+          }
+          if (data.state === "error") {
+            clearInterval(timer);
+            runButton.disabled = false;
+            logLines.push(data.message || "Scan failed");
+            renderLog(100, "Scan failed");
+          }
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Scan #{{ scan_id }} | WebSec Scanner{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Scan #{{ scan_id }}</p>
+      <h1>{{ result.target_url }}</h1>
+      <p class="muted">Finished {{ result.finished_at }}</p>
+    </div>
+    <div class="actions">
+      <a class="link-button" href="{{ url_for('scan_json', scan_id=scan_id) }}">JSON</a>
+      <a class="link-button primary" href="{{ url_for('scan_pdf', scan_id=scan_id) }}">PDF Report</a>
+    </div>
+  </div>
+
+  <div class="grid counts">
+    {% set grade = result.metadata.get("grade", "A") %}
+    <div class="count grade grade-{{ grade|lower }}">
+      <strong>{{ grade }}</strong>
+      <span>Security Grade</span>
+    </div>
+    <div class="count risk">
+      <strong>{{ result.metadata.get("risk_score", 0) }}</strong>
+      <span>Risk Score</span>
+    </div>
+    {% for severity, count in result.severity_counts().items() %}
+      <div class="count {{ severity|lower }}">
+        <strong>{{ count }}</strong>
+        <span>{{ severity }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel coverage-panel">
+  <div class="panel-head">
+    <div>
+      <h2>Assessment Coverage</h2>
+      <p class="muted">Mapped domains for judge-friendly review and internship presentation.</p>
+    </div>
+  </div>
+  <div class="coverage-grid">
+    {% for domain, status in result.metadata.get("coverage", {}).items() %}
+      <div class="coverage-item">
+        <span>{{ domain }}</span>
+        <strong class="{{ status|lower }}">{{ status }}</strong>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Crawl Coverage</h2>
+      <p class="muted">{{ result.metadata.get("profile", "standard")|title }} profile · {{ result.metadata.get("scanned_url_count", 1) }} URLs scanned</p>
+    </div>
+  </div>
+  {% if result.metadata.get("crawled_pages") %}
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Status</th>
+          <th>Depth</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for page in result.metadata.get("crawled_pages") %}
+          <tr>
+            <td>{{ page.url }}</td>
+            <td>{{ page.status_code }}</td>
+            <td>{{ page.depth }}</td>
+            <td>{{ page.title }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">No pages were crawled.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Findings</h2>
+  {% if result.findings %}
+    <div class="findings">
+      {% for finding in result.findings %}
+        <article class="finding">
+          <div class="finding-head">
+            <div>
+              <span class="badge {{ finding.severity|lower }}">{{ finding.severity }} · CVSS {{ "%.1f"|format(finding.cvss) }}</span>
+              <h3>{{ finding.title }}</h3>
+            </div>
+            <span class="module">{{ finding.module }}</span>
+          </div>
+          <p>{{ finding.description }}</p>
+          <dl>
+            <dt>Evidence</dt>
+            <dd>{{ finding.evidence }}</dd>
+            <dt>Remediation</dt>
+            <dd>{{ finding.remediation }}</dd>
+            <dt>URL</dt>
+            <dd>{{ finding.url }}</dd>
+          </dl>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty">No findings were detected by the enabled modules.</p>
+  {% endif %}
+</section>
+
+{% if result.metadata.module_errors %}
+<section class="panel warning-panel">
+  <h2>Module Notes</h2>
+  {% for module, error in result.metadata.module_errors.items() %}
+    <p><strong>{{ module }}:</strong> {{ error }}</p>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}
